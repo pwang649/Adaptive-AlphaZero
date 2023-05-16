@@ -11,7 +11,7 @@ from functools import reduce
 
 import sys
 sys.path.append('../build')
-from library import MCTS, Gomoku, NeuralNetwork
+from library import MCTS_cent, Gomoku, NeuralNetwork
 
 from neural_network import NeuralNetWorkWrapper
 from gomoku_gui import GomokuGUI

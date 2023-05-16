@@ -4,7 +4,7 @@
 #include <numeric>
 #include <iostream>
 
-#include <mcts.h>
+#include <mcts_cent.h>
 
 using namespace std::chrono;
 
@@ -160,8 +160,8 @@ double TreeNode::get_value(double c_puct, double c_virtual_loss,
   }
 }
 
-// MCTS
-MCTS::MCTS(NeuralNetwork *neural_network, unsigned int thread_num, double c_puct,
+// MCTS_cent
+MCTS_cent::MCTS_cent(NeuralNetwork *neural_network, unsigned int thread_num, double c_puct,
            unsigned int num_mcts_sims, double c_virtual_loss,
            unsigned int action_size)
     : neural_network(neural_network),
@@ -170,9 +170,9 @@ MCTS::MCTS(NeuralNetwork *neural_network, unsigned int thread_num, double c_puct
       num_mcts_sims(num_mcts_sims),
       c_virtual_loss(c_virtual_loss),
       action_size(action_size),
-      root(new TreeNode(nullptr, 1., action_size), MCTS::tree_deleter) {}
+      root(new TreeNode(nullptr, 1., action_size), MCTS_cent::tree_deleter) {}
 
-void MCTS::update_with_move(int last_action)
+void MCTS_cent::update_with_move(int last_action)
 {
   auto old_root = this->root.get();
 
@@ -192,7 +192,7 @@ void MCTS::update_with_move(int last_action)
   }
 }
 
-void MCTS::tree_deleter(TreeNode *t)
+void MCTS_cent::tree_deleter(TreeNode *t)
 {
   if (t == nullptr)
   {
@@ -212,7 +212,7 @@ void MCTS::tree_deleter(TreeNode *t)
   delete t;
 }
 
-std::vector<double> MCTS::get_action_probs(Gomoku *gomoku, double temp)
+std::vector<double> MCTS_cent::get_action_probs(Gomoku *gomoku, double temp)
 {
   auto begin = high_resolution_clock::now();
 
@@ -273,7 +273,7 @@ bool future_is_ready(std::future<R> const &f)
 }
 
 // expansion + simulation
-std::pair<TreeNode *, std::pair<double, std::vector<double>>> MCTS::exc_sim(TreeNode *node, std::shared_ptr<Gomoku> game)
+std::pair<TreeNode *, std::pair<double, std::vector<double>>> MCTS_cent::exc_sim(TreeNode *node, std::shared_ptr<Gomoku> game)
 {
   std::vector<double> action_priors(this->action_size, 0);
 
@@ -318,7 +318,7 @@ std::pair<TreeNode *, std::pair<double, std::vector<double>>> MCTS::exc_sim(Tree
   return std::make_pair(node, std::make_pair(value, action_priors));
 }
 
-void MCTS::simulate(Gomoku *gomoku)
+void MCTS_cent::simulate(Gomoku *gomoku)
 {
 
   std::vector<std::future<std::pair<TreeNode *, std::pair<double, std::vector<double>>>>> futures(this->thread_pool->get_idl_num());
@@ -357,7 +357,7 @@ void MCTS::simulate(Gomoku *gomoku)
     }
     else
     {
-      auto future = this->thread_pool->commit(std::bind(&MCTS::exc_sim, this, node, game));
+      auto future = this->thread_pool->commit(std::bind(&MCTS_cent::exc_sim, this, node, game));
       futures[available] = std::move(future);
       occupied++;
       available++;
