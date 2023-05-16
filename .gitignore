@@ -1,0 +1,10 @@
+__pycache__
+.pyc
+.vscode
+.vs
+build
+models
+.idea
+libtorch
+src/learner.pyc
+.DS_Store
