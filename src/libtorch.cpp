@@ -119,12 +119,11 @@ void NeuralNetwork::infer() {
   std::vector<torch::jit::IValue> inputs{
       this->use_gpu ? torch::cat(states, 0).to(at::kCUDA)
                     : torch::cat(states, 0)};
-  auto begin = std::chrono::high_resolution_clock::now();
+  // auto begin = std::chrono::high_resolution_clock::now();
   auto result = this->module->forward(inputs).toTuple();
-  auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
-  this->inf_time += duration.count();
-//	std::cout << "real inference time: " << duration.count() << std::endl;
+  // auto end = std::chrono::high_resolution_clock::now();
+  // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+  // this->inf_time += duration.count();
   torch::Tensor p_batch = result->elements()[0]
                               .toTensor()
                               .exp()

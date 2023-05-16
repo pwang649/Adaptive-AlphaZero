@@ -220,19 +220,14 @@ std::vector<double> MCTS_decent::get_action_probs(Gomoku *gomoku, double temp)
 {
   // submit simulate tasks to thread_pool
   std::vector<std::future<void>> futures;
-  auto commit_time = 0;
   auto begin = high_resolution_clock::now();
 
   for (unsigned int i = 0; i < this->num_mcts_sims; i++)
   {
     // copy gomoku
     auto game = std::make_shared<Gomoku>(*gomoku);
-    auto begin = high_resolution_clock::now();
     auto future =
         this->thread_pool->commit(std::bind(&MCTS_decent::simulate, this, game));
-    auto end = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(end - begin);
-    commit_time += duration.count();
     // future can't copy
     futures.emplace_back(std::move(future));
   }
@@ -247,7 +242,6 @@ std::vector<double> MCTS_decent::get_action_probs(Gomoku *gomoku, double temp)
   auto duration = duration_cast<microseconds>(end - begin);
 
   std::cout << "Time for one Run: " << duration.count() << " us." << std::endl;
-  std::cout << "Time for commit in one run: " << commit_time << "us." << std::endl;
 
   // calculate probs
   std::vector<double> action_probs(gomoku->get_action_size(), 0);
