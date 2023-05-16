@@ -8,8 +8,8 @@
 
 using namespace std::chrono;
 
-// TreeNode
-TreeNode::TreeNode()
+// TreeNode_decent
+TreeNode_decent::TreeNode_decent()
     : parent(nullptr),
       is_leaf(true),
       virtual_loss(0),
@@ -17,7 +17,7 @@ TreeNode::TreeNode()
       p_sa(0),
       q_sa(0) {}
 
-TreeNode::TreeNode(TreeNode *parent, double p_sa, unsigned int action_size)
+TreeNode_decent::TreeNode_decent(TreeNode_decent *parent, double p_sa, unsigned int action_size)
     : parent(parent),
       children(action_size, nullptr),
       is_leaf(true),
@@ -26,8 +26,8 @@ TreeNode::TreeNode(TreeNode *parent, double p_sa, unsigned int action_size)
       q_sa(0),
       p_sa(p_sa) {}
 
-TreeNode::TreeNode(
-    const TreeNode &node)
+TreeNode_decent::TreeNode_decent(
+    const TreeNode_decent &node)
 { // because automic<>, define copy function
   // struct
   this->parent = node.parent;
@@ -41,7 +41,7 @@ TreeNode::TreeNode(
   this->virtual_loss.store(node.virtual_loss.load());
 }
 
-TreeNode &TreeNode::operator=(const TreeNode &node)
+TreeNode_decent &TreeNode_decent::operator=(const TreeNode_decent &node)
 {
   if (this == &node)
   {
@@ -61,11 +61,11 @@ TreeNode &TreeNode::operator=(const TreeNode &node)
   return *this;
 }
 
-unsigned int TreeNode::select(double c_puct, double c_virtual_loss)
+unsigned int TreeNode_decent::select(double c_puct, double c_virtual_loss)
 {
   double best_value = -DBL_MAX;
   unsigned int best_move = 0;
-  TreeNode *best_node;
+  TreeNode_decent *best_node;
 
   for (unsigned int i = 0; i < this->children.size(); i++)
   {
@@ -92,7 +92,7 @@ unsigned int TreeNode::select(double c_puct, double c_virtual_loss)
   return best_move;
 }
 
-void TreeNode::expand(const std::vector<double> &action_priors)
+void TreeNode_decent::expand(const std::vector<double> &action_priors)
 {
   {
     // get lock
@@ -109,7 +109,7 @@ void TreeNode::expand(const std::vector<double> &action_priors)
         {
           continue;
         }
-        this->children[i] = new TreeNode(this, action_priors[i], action_size);
+        this->children[i] = new TreeNode_decent(this, action_priors[i], action_size);
       }
 
       // not leaf
@@ -118,7 +118,7 @@ void TreeNode::expand(const std::vector<double> &action_priors)
   }
 }
 
-void TreeNode::backup(double value)
+void TreeNode_decent::backup(double value)
 {
   // If it is not root, this node's parent should be updated first
   if (this->parent != nullptr)
@@ -140,7 +140,7 @@ void TreeNode::backup(double value)
   }
 }
 
-double TreeNode::get_value(double c_puct, double c_virtual_loss,
+double TreeNode_decent::get_value(double c_puct, double c_virtual_loss,
                            unsigned int sum_n_visited) const
 {
   // u
@@ -171,7 +171,7 @@ MCTS_decent::MCTS_decent(NeuralNetwork *neural_network, unsigned int thread_num,
       num_mcts_sims(num_mcts_sims),
       c_virtual_loss(c_virtual_loss),
       action_size(action_size),
-      root(new TreeNode(nullptr, 1., action_size), MCTS_decent::tree_deleter) {}
+      root(new TreeNode_decent(nullptr, 1., action_size), MCTS_decent::tree_deleter) {}
       //selection_time(0),
       //expansion_time(0),
       //backprop_time(0) {}
@@ -184,7 +184,7 @@ void MCTS_decent::update_with_move(int last_action)
   if (last_action >= 0 && old_root->children[last_action] != nullptr)
   {
     // unlink
-    TreeNode *new_node = old_root->children[last_action];
+    TreeNode_decent *new_node = old_root->children[last_action];
     old_root->children[last_action] = nullptr;
     new_node->parent = nullptr;
 
@@ -192,11 +192,11 @@ void MCTS_decent::update_with_move(int last_action)
   }
   else
   {
-    this->root.reset(new TreeNode(nullptr, 1., this->action_size));
+    this->root.reset(new TreeNode_decent(nullptr, 1., this->action_size));
   }
 }
 
-void MCTS_decent::tree_deleter(TreeNode *t)
+void MCTS_decent::tree_deleter(TreeNode_decent *t)
 {
   if (t == nullptr)
   {

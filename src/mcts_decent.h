@@ -10,16 +10,16 @@
 #include <thread_pool.h>
 #include <libtorch.h>
 
-class TreeNode {
+class TreeNode_decent {
  public:
   // friend class can access private variables
   friend class MCTS_decent;
 
-  TreeNode();
-  TreeNode(const TreeNode &node);
-  TreeNode(TreeNode *parent, double p_sa, unsigned action_size);
+  TreeNode_decent();
+  TreeNode_decent(const TreeNode_decent &node);
+  TreeNode_decent(TreeNode_decent *parent, double p_sa, unsigned action_size);
 
-  TreeNode &operator=(const TreeNode &p);
+  TreeNode_decent &operator=(const TreeNode_decent &p);
 
   unsigned int select(double c_puct, double c_virtual_loss);
   void expand(const std::vector<double> &action_priors);
@@ -31,8 +31,8 @@ class TreeNode {
 
  private:
   // store tree
-  TreeNode *parent;
-  std::vector<TreeNode *> children;
+  TreeNode_decent *parent;
+  std::vector<TreeNode_decent *> children;
   bool is_leaf;
   std::mutex lock;
 
@@ -52,10 +52,10 @@ class MCTS_decent {
 
  private:
   void simulate(std::shared_ptr<Gomoku> game);
-  static void tree_deleter(TreeNode *t);
+  static void tree_deleter(TreeNode_decent *t);
 
   // variables
-  std::unique_ptr<TreeNode, decltype(MCTS_decent::tree_deleter) *> root;
+  std::unique_ptr<TreeNode_decent, decltype(MCTS_decent::tree_deleter) *> root;
   std::unique_ptr<ThreadPool> thread_pool;
   NeuralNetwork *neural_network;
 
