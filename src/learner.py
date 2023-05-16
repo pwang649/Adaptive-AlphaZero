@@ -11,7 +11,7 @@ from functools import reduce
 
 import sys
 sys.path.append('../build')
-from library import MCTS_cent, Gomoku, NeuralNetwork
+from library import MCTS_cent, MCTS_decent, Gomoku, NeuralNetwork
 
 from neural_network import NeuralNetWorkWrapper
 from gomoku_gui import GomokuGUI
@@ -49,6 +49,7 @@ class Leaner():
         self.examples_buffer = deque([], maxlen=config['examples_buffer_max_len'])
 
         # mcts
+        self.centralized = config['centralized']
         self.inference_batch_size = config['inference_batch_size']
         self.num_mcts_sims = config['num_mcts_sims']
         self.c_puct = config['c_puct']
@@ -140,9 +141,10 @@ class Leaner():
         """
         train_examples = []
 
-        player1 = MCTS_cent(libtorch, self.num_mcts_threads, self.c_puct,
+        MCTS = MCTS_cent if self.centralized else MCTS_decent
+        player1 = MCTS(libtorch, self.num_mcts_threads, self.c_puct,
                     self.num_mcts_sims, self.c_virtual_loss, self.action_size)
-        player2 = MCTS_cent(libtorch, self.num_mcts_threads, self.c_puct,
+        player2 = MCTS(libtorch, self.num_mcts_threads, self.c_puct,
             self.num_mcts_sims, self.c_virtual_loss, self.action_size)
         players = [player2, None, player1]
         player_index = 1
@@ -225,9 +227,10 @@ class Leaner():
 
     def _contest(self, network1, network2, first_player, show):
         # create MCTS
-        player1 = MCTS_cent(network1, self.num_mcts_threads, self.c_puct,
+        MCTS = MCTS_cent if self.centralized else MCTS_decent
+        player1 = MCTS(network1, self.num_mcts_threads, self.c_puct,
             self.num_mcts_sims, self.c_virtual_loss, self.action_size)
-        player2 = MCTS_cent(network2, self.num_mcts_threads, self.c_puct,
+        player2 = MCTS(network2, self.num_mcts_threads, self.c_puct,
                     self.num_mcts_sims, self.c_virtual_loss, self.action_size)
 
         # prepare
@@ -290,7 +293,8 @@ class Leaner():
 
         # load best model
         libtorch_best = NeuralNetwork('./models/best_checkpoint.pt', self.libtorch_use_gpu, 12)
-        mcts_best = MCTS_cent(libtorch_best, self.num_mcts_threads * 3, \
+        MCTS = MCTS_cent if self.centralized else MCTS_decent
+        mcts_best = MCTS(libtorch_best, self.num_mcts_threads * 3, \
              self.c_puct, self.num_mcts_sims * 6, self.c_virtual_loss, self.action_size)
 
         # create gomoku game

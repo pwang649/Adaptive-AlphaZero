@@ -5,6 +5,7 @@ config = {
     'use_gui': False,                           # show gomoku gui in training mode
 
     # mcts
+    'centralized' : True,                       # whether to use the centralized method
     'libtorch_use_gpu' : True,                  # libtorch use cuda
     'inference_batch_size': -1,                 # -1: default to be num_mcts_thread
     'num_mcts_threads': 32,                     # mcts threads number

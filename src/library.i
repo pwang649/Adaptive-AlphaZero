@@ -4,6 +4,7 @@
 #include "gomoku.h"
 #include "libtorch.h"
 #include "mcts_cent.h"
+#include "mcts_decent.h"
 %}
 
 %include "std_vector.i"
@@ -18,6 +19,7 @@ namespace std {
 
 %include "gomoku.h"
 %include "mcts_cent.h"
+#include "mcts_decent.h"
 
 class NeuralNetwork {
  public:
